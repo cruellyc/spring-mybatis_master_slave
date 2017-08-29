@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cache.IDao.CartDao">
+	<!-- mybatis 添加了ehcache 不用在添加 ehcache.xml （两者不能同时存在）-->
+	<!-- <cache type="org.mybatis.caches.ehcache.EhcacheCache" >
+		<property name="timeToIdleSeconds" value="3600"/>
+		<property name="timeToLiveSeconds" value="3600"/>
+		<property name="maxEntriesLocalHeap" value="1000"/>
+		<property name="maxEntriesLocalDisk" value="10000000"/>
+		<property name="memoryStoreEvictionPolicy" value="LRU"/>
+	</cache> -->
+	<!-- 加载购物车列表-->
+	<select id="loadCartList" resultType="Cart">
+		SELECT *
+		  FROM Cart
+		<where>
+			 isValid=1 and uid=#{uid}
+			 and state in 
+			<foreach item="item" index="index" collection="state" open="(" separator="," close=")">  
+				#{item}
+			</foreach>
+		</where>
+		<if test="pCount != 0">
+			limit #{pNow},#{pCount}
+		</if>
+	</select>
+	<!-- 购物车记录条数-->
+	<select id="getTotal" resultType="int">
+		SELECT count(*)
+		  FROM Cart
+		<where>
+			 isValid=1 and uid=#{uid}
+			 and state in 
+			<foreach item="item" index="index" collection="state" open="(" separator="," close=")">  
+				#{item}
+			</foreach>
+		</where>
+	</select>
+	
+	<!-- 修改购物车状态-->
+	<update id="updateCartState"> 
+        UPDATE Cart 
+	        SET state = #{state}
+	    <where>
+	    	id = #{id}
+	    </where>
+    </update>
+    <!-- 加入购物车-->
+    <insert id="addCart" parameterType="Cart"> 
+        insert into Cart(
+	        id
+	        ,uid
+	        ,shelId
+	        ,num
+	        ,goodsId
+	        ,state
+	        ,isValid
+	        ,time
+	        ,cityId
+        )
+        values(
+	        #{id}
+	        ,#{uid}
+	        ,#{shelId}
+	        ,#{num}
+	        ,#{goodsId}
+	        ,#{state}
+	        ,#{isValid}
+	        ,#{time}
+	        ,#{cityId}
+        )  
+    </insert>
+</mapper>
